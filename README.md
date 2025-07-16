@@ -14,12 +14,12 @@
      git checkout deploy/seeno
      ```
    - Fusiona los cambios de `main`:
-     ```bash
+```bash
      git merge main
      ```
    - Ajusta archivos de configuración para producción si es necesario (Procfile, variables de entorno, etc.).
    - Haz commit y push:
-     ```bash
+```bash
      git add .
      git commit -m "deploy: actualizar para producción"
      git push origin deploy/seeno

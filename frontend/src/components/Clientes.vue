@@ -45,7 +45,8 @@
       <div class="paginacion">
         <button @click="paginaAnterior" :disabled="pagina === 1" class="btn btn-secondary">Anterior</button>
         <span>Página {{ pagina }}</span>
-        <button @click="paginaSiguiente" :disabled="clientes.length < limite" class="btn btn-secondary">Siguiente</button>
+        <button @click="paginaSiguiente" :disabled="!hayMasPaginas" class="btn btn-secondary">Siguiente</button>
+        <span v-if="totalClientes > 0" class="total-clientes">Total: {{ totalClientes }}</span>
       </div>
     </div>
   </div>
@@ -73,7 +74,8 @@ export default {
         nombre: '',
         telefono: '',
         email: ''
-      }
+      },
+      totalClientes: 0,
     }
   },
   mounted() {
@@ -205,8 +207,9 @@ export default {
         const res = await fetch(`${apiUrl}/clientes?${params}`)
         if (!res.ok) throw new Error('No se pudo cargar la lista de clientes')
         const data = await res.json()
-        this.clientes = data.clientes || data
+        this.clientes = data.clientes || []
         this.hayMasPaginas = data.hayMasPaginas !== undefined ? data.hayMasPaginas : false
+        this.totalClientes = data.total || 0
       } catch (e) {
         this.error = e.message
       }
@@ -504,6 +507,11 @@ h2 {
   gap: 1.2rem;
   justify-content: center;
   margin-top: 1.5rem;
+}
+.total-clientes {
+  color: #64748b;
+  font-size: 0.98em;
+  margin-left: 1.2rem;
 }
 
 @media (max-width: 1100px) {

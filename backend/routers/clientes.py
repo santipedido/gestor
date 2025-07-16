@@ -19,7 +19,21 @@ def listar_clientes(
         from_ = (page - 1) * limit
         to_ = from_ + limit - 1
         result = query.range(from_, to_).execute()
-        return result.data
+        clientes = result.data
+        # Obtener el total de clientes (con o sin búsqueda)
+        total_query = supabase.table("clientes").select("id")
+        if search:
+            total_query = total_query.or_(
+                f"nombre.ilike.%{search}%,telefono.ilike.%{search}%,direccion.ilike.%{search}%"
+            )
+        total_result = total_query.execute()
+        total = len(total_result.data)
+        hay_mas = (from_ + limit) < total
+        return {
+            "clientes": clientes,
+            "total": total,
+            "hayMasPaginas": hay_mas
+        }
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
