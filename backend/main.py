@@ -7,7 +7,12 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Permitir cualquier origen para producción
+    allow_origins=[
+        "https://sensational-alpaca-3c0c39.netlify.app",  # Frontend en Netlify (anterior)
+        "https://pedidosq.netlify.app",  # Frontend en Netlify (nuevo)
+        "http://localhost:5173",  # Frontend local
+        "http://127.0.0.1:5173"   # Frontend local (alternativo)
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
