@@ -5,7 +5,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Permite todos los orígenes temporalmente
+    allow_origins=["https://sensational-alpaca-3c0c39.netlify.app/"],  # Permite todos los orígenes temporalmente
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
