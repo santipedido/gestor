@@ -1,25 +1,29 @@
-# Proyecto Gestor de Pedidos
+# gestor_pedidos
 
-Estructura completa con backend (FastAPI) y frontend (Vue 3 con Vite).
+## Flujo de trabajo profesional con ramas
 
-## Instrucciones
+- **main**: Rama para desarrollo y pruebas locales. Aquí puedes hacer cambios, pruebas y ajustes sin preocuparte por el entorno de producción.
+- **deploy/seeno**: Rama exclusiva para producción y deploy en Seeno. Solo fusiona aquí lo que esté listo para desplegar.
 
-### Backend
-```bash
-cd backend
-python -m venv env
-source env/bin/activate  # o env\Scripts\activate en Windows
-pip install -r requirements.txt
-uvicorn main:app --reload
-```
+### ¿Cómo trabajar?
 
-### Frontend
-```bash
-cd frontend
-npm install
-npm run dev
-```
+1. Trabaja y prueba localmente en la rama `main`.
+2. Cuando una funcionalidad esté lista para producción:
+   - Cambia a la rama de deploy:
+     ```bash
+     git checkout deploy/seeno
+     ```
+   - Fusiona los cambios de `main`:
+     ```bash
+     git merge main
+     ```
+   - Ajusta archivos de configuración para producción si es necesario (Procfile, variables de entorno, etc.).
+   - Haz commit y push:
+     ```bash
+     git add .
+     git commit -m "deploy: actualizar para producción"
+     git push origin deploy/seeno
+     ```
+3. Realiza el deploy desde Seeno usando la rama `deploy/seeno`.
 
-### Variables de entorno
-- Copiar `.env.example` como `.env`
-- Llenar valores de Supabase
+**Nota:** Nunca subas archivos sensibles como `.env` al repositorio. Configura las variables de entorno desde el panel de Seeno.

@@ -20,7 +20,8 @@ export default {
       this.respuesta = ''
       this.error = ''
       try {
-        const res = await fetch('http://127.0.0.1:8000/')
+        const apiUrl = import.meta.env.VITE_API_URL
+        const res = await fetch(`${apiUrl}/`)
         if (!res.ok) throw new Error('No responde el backend')
         const data = await res.json()
         this.respuesta = JSON.stringify(data)
