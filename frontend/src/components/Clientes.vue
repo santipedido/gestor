@@ -29,16 +29,28 @@
     <div class="card card-listado">
       <h2>Lista de clientes</h2>
       <input v-model="busqueda" @input="buscarClientes" placeholder="Buscar clientes..." class="search-input" />
-      <div class="clientes-grid">
+      <div class="clientes-grid grid-responsive">
         <div v-for="cliente in clientes" :key="cliente.id" class="tarjeta-cliente">
           <div class="cliente-info">
             <span class="cliente-nombre">{{ cliente.nombre }}</span>
-            <span class="cliente-tel">{{ cliente.telefono }}</span>
-            <span class="cliente-dir">{{ cliente.direccion }}</span>
+            <span class="cliente-tel">
+              <span class="info-label">Teléfono:</span>
+              {{ cliente.telefono }}
+            </span>
+            <span class="cliente-dir">
+              <span class="info-label">Dirección:</span>
+              {{ cliente.direccion }}
+            </span>
           </div>
           <div class="cliente-actions">
-            <button @click="editarCliente(cliente)" class="btn btn-edit">Editar</button>
-            <button @click="eliminarCliente(cliente.id)" class="btn btn-delete">Eliminar</button>
+            <button @click="editarCliente(cliente)" class="btn btn-edit" title="Editar">
+              <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 13.5V16h2.5l7.06-7.06-2.5-2.5L4 13.5zM17.71 6.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.13 1.13 3.75 3.75 1.13-1.13z" fill="currentColor"/></svg>
+              Editar
+            </button>
+            <button @click="eliminarCliente(cliente.id)" class="btn btn-delete" title="Eliminar">
+              <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 7v7a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V7M9 10v3m2-3v3M4 7h12M8 4h4a1 1 0 0 1 1 1v1H7V5a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Eliminar
+            </button>
           </div>
         </div>
       </div>

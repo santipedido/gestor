@@ -403,3 +403,127 @@ h1, h2, h3 {
     display: flex;
   }
 } 
+
+/* ====== Mejoras de separación y legibilidad ====== */
+
+/* Separación entre buscador y botones */
+.listado-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.2rem;
+  margin-bottom: 1.2rem;
+}
+
+.search-input {
+  margin-bottom: 1.7rem;
+}
+
+/* Paginación más pequeña y separada */
+.paginacion {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  justify-content: center;
+  margin-top: 1.2rem;
+  font-size: 0.97rem;
+  color: var(--color-text-light);
+}
+.paginacion span, .paginacion .total-productos, .paginacion .total-clientes {
+  font-size: 0.97rem;
+  color: var(--color-text-light);
+  margin: 0 0.3rem;
+}
+
+/* Botones de acción más separados */
+.producto-actions, .cliente-actions {
+  display: flex;
+  gap: 0.7rem;
+  align-items: center;
+  margin-left: auto;
+}
+
+.btn-edit, .btn-delete {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  font-size: 0.98rem;
+  padding: 0.5rem 1.1rem;
+  border-radius: 999px;
+}
+
+.btn-edit {
+  background: #22c55e;
+  color: #fff;
+  border: 2px solid #22c55e;
+}
+.btn-edit:hover {
+  background: #16a34a;
+}
+.btn-delete {
+  background: #ef4444;
+  color: #fff;
+  border: 2px solid #ef4444;
+}
+.btn-delete:hover {
+  background: #b91c1c;
+}
+
+/* Iconos en botones */
+.btn-edit svg, .btn-delete svg {
+  width: 1.1em;
+  height: 1.1em;
+  vertical-align: middle;
+}
+
+/* Tarjetas de productos/clientes: info clara y legible */
+.tarjeta-producto, .tarjeta-cliente {
+  padding: 1.3rem 1.1rem;
+  margin-bottom: 0.7rem;
+}
+.producto-info, .cliente-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 0.7rem;
+}
+.producto-nombre, .cliente-nombre {
+  font-weight: 700;
+  color: var(--color-primary);
+  font-size: 1.13em;
+  margin-bottom: 0.1em;
+}
+.producto-precio, .cliente-tel {
+  color: #2563eb;
+  font-size: 1em;
+  font-weight: 600;
+  margin-bottom: 0.1em;
+}
+.producto-paca, .cliente-dir {
+  color: var(--color-text-light);
+  font-size: 0.97em;
+  font-weight: 500;
+  margin-bottom: 0.1em;
+}
+
+/* Etiquetas para info secundaria */
+.info-label {
+  font-size: 0.93em;
+  color: var(--color-text-light);
+  font-weight: 500;
+  margin-right: 0.3em;
+}
+
+@media (max-width: 700px) {
+  .paginacion {
+    gap: 0.7rem;
+    font-size: 0.93rem;
+  }
+  .paginacion span, .paginacion .total-productos, .paginacion .total-clientes {
+    font-size: 0.93rem;
+  }
+  .producto-actions, .cliente-actions {
+    gap: 0.5rem;
+  }
+} 

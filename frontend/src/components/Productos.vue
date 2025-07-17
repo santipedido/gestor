@@ -57,21 +57,28 @@
         </div>
       </div>
       <input v-model="busqueda" @input="buscarProductos" placeholder="Buscar productos..." class="search-input" />
-      <div class="productos-grid">
+      <div class="productos-grid grid-responsive">
         <div v-for="producto in productos" :key="producto.id" class="tarjeta-producto">
           <div class="producto-info">
             <span class="producto-nombre">{{ producto.nombre }}</span>
             <span class="producto-precio">
+              <span class="info-label">Precio:</span>
               ${{ Number(producto.precio).toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
             </span>
             <span v-if="producto.unidades_por_paca" class="producto-paca">
-              Paca: {{ producto.unidades_por_paca }} unidades - 
+              <span class="info-label">Paca:</span> {{ producto.unidades_por_paca }} unidades - 
               ${{ (Number(producto.precio) * producto.unidades_por_paca).toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
             </span>
           </div>
           <div class="producto-actions">
-            <button @click="editarProducto(producto)" class="btn btn-edit">Editar</button>
-            <button @click="eliminarProducto(producto.id)" class="btn btn-delete">Eliminar</button>
+            <button @click="editarProducto(producto)" class="btn btn-edit" title="Editar">
+              <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 13.5V16h2.5l7.06-7.06-2.5-2.5L4 13.5zM17.71 6.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.13 1.13 3.75 3.75 1.13-1.13z" fill="currentColor"/></svg>
+              Editar
+            </button>
+            <button @click="eliminarProducto(producto.id)" class="btn btn-delete" title="Eliminar">
+              <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 7v7a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V7M9 10v3m2-3v3M4 7h12M8 4h4a1 1 0 0 1 1 1v1H7V5a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Eliminar
+            </button>
           </div>
         </div>
       </div>
