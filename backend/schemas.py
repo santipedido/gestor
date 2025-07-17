@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import List
 
 class Producto(BaseModel):
     """
@@ -8,3 +9,12 @@ class Producto(BaseModel):
     nombre: str
     precio: float  # Valor en pesos colombianos (COP)
     unidades_por_paca: int | None = None  # Opcional, null si no aplica
+
+class PedidoProductoCreate(BaseModel):
+    producto_id: int
+    tipo: str  # 'unidad' o 'paca'
+    cantidad: int
+
+class PedidoCreate(BaseModel):
+    cliente_id: int
+    productos: List[PedidoProductoCreate]
