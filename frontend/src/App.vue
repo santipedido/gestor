@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- Forzar deploy limpio Netlify -->
     <Clientes />
     <div style="margin-top: 2rem; color: #555;">
       <strong>API URL usada:</strong>
