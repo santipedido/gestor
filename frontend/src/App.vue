@@ -19,6 +19,7 @@
 <script>
 import Productos from './components/Productos.vue'
 import Clientes from './components/Clientes.vue'
+import './assets/global.css'
 
 export default {
   components: {
@@ -34,14 +35,6 @@ export default {
 </script>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
-
-.app-root {
-  min-height: 100vh;
-  background: #f7fafd;
-  font-family: 'Poppins', 'Inter', 'Segoe UI', Arial, sans-serif;
-}
-
 .main-header {
   position: sticky;
   top: 0;
