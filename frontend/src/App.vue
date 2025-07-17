@@ -1,13 +1,18 @@
 <template>
-  <div class="app-container">
-    <nav class="nav-bar">
-      <button :class="{ active: vista === 'productos' }" @click="vista = 'productos'">Productos</button>
-      <button :class="{ active: vista === 'clientes' }" @click="vista = 'clientes'">Clientes</button>
-    </nav>
-    <div class="main-content">
+  <div class="app-root">
+    <header class="main-header">
+      <div class="header-content">
+        <span class="logo">Gestor de Pedidos</span>
+        <nav class="nav-bar">
+          <button :class="{ active: vista === 'productos' }" @click="vista = 'productos'">Productos</button>
+          <button :class="{ active: vista === 'clientes' }" @click="vista = 'clientes'">Clientes</button>
+        </nav>
+      </div>
+    </header>
+    <main class="main-content">
       <Productos v-if="vista === 'productos'" />
       <Clientes v-else />
-    </div>
+    </main>
   </div>
 </template>
 
@@ -31,52 +36,79 @@ export default {
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
 
-html, body, #app {
+.app-root {
+  min-height: 100vh;
+  background: #f7fafd;
   font-family: 'Poppins', 'Inter', 'Segoe UI', Arial, sans-serif;
 }
-.nav-bar {
+
+.main-header {
   position: sticky;
   top: 0;
   z-index: 100;
+  background: #fff;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+  padding: 0;
+}
+.header-content {
   display: flex;
-  gap: 1rem;
-  padding: 1.5rem 0 1.5rem 1rem;
-  background: #f7fafd;
-  border-bottom: 1px solid #e0e0e0;
-  margin-bottom: 0;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0.7rem 1.5rem;
+}
+.logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2563eb;
+  letter-spacing: 0.01em;
+}
+.nav-bar {
+  display: flex;
+  gap: 1.2rem;
 }
 .nav-bar button {
   background: none;
   border: none;
   font-size: 1.1rem;
   font-weight: 600;
-  color: #2980b9;
+  color: #2563eb;
   cursor: pointer;
-  padding: 0.5rem 1.2rem;
-  border-radius: 6px;
-  transition: background 0.2s;
+  padding: 0.6rem 1.5rem;
+  border-radius: 8px;
+  transition: background 0.2s, color 0.2s;
+  letter-spacing: 0.01em;
 }
 .nav-bar button.active, .nav-bar button:hover {
-  background: #2980b9;
+  background: #2563eb;
   color: #fff;
 }
 
-.app-container {
-  display: flex;
-  flex-direction: column;
+.main-content {
   width: 100%;
-  max-width: 1400px;
+  max-width: 1200px;
   margin: 0 auto;
+  padding: 2.5rem 1rem 2rem 1rem;
   box-sizing: border-box;
 }
 
-.main-content {
-  padding-top: 2.5rem;
-}
-
-@media (min-width: 900px) {
+@media (max-width: 700px) {
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.7rem;
+    padding: 1rem 1rem 0.5rem 1rem;
+  }
   .main-content {
-    padding-top: 3rem;
+    padding: 1.2rem 0.3rem 1.5rem 0.3rem;
+  }
+  .logo {
+    font-size: 1.15rem;
+  }
+  .nav-bar button {
+    font-size: 1rem;
+    padding: 0.5rem 1.1rem;
   }
 }
 </style>
