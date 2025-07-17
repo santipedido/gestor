@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from database import supabase
-from backend.schemas import PedidoCreate
+from schemas import PedidoCreate
 
 router = APIRouter(prefix="/pedidos", tags=["pedidos"])
 
