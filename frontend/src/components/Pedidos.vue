@@ -46,6 +46,9 @@
           <button @click="eliminarProducto(idx)">Eliminar</button>
         </li>
       </ul>
+      <div class="total-pedido">
+        <strong>Total del pedido: ${{ totalPedido.toLocaleString() }}</strong>
+      </div>
       <button @click="enviarPedido" :disabled="enviando">Enviar pedido</button>
     </div>
     <div v-if="mensaje" class="mensaje-exito">{{ mensaje }}</div>
@@ -74,6 +77,16 @@ export default {
       mensaje: '',
       error: '',
       enviando: false
+    }
+  },
+  computed: {
+    totalPedido() {
+      return this.pedido.productos.reduce((total, prod) => {
+        let precioUnitario = prod.tipo === 'paca' 
+          ? (prod.precio * prod.unidades_por_paca) 
+          : prod.precio;
+        return total + (precioUnitario * prod.cantidad);
+      }, 0);
     }
   },
   mounted() {
@@ -267,6 +280,14 @@ button:disabled {
   background: #f9f9f9;
   padding: 1rem;
   border-radius: 8px;
+}
+.total-pedido {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: #e8f4fd;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 1.1rem;
 }
 .mensaje-exito {
   color: green;
