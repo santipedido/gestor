@@ -234,7 +234,7 @@ export default {
           limit: this.limite,
           search: this.busqueda
         })
-        const res = await fetch(`${apiUrl}/productos?${params}`)
+        const res = await fetch(`${apiUrl}/productos/?${params}`)
         if (!res.ok) throw new Error('No se pudo cargar la lista de productos')
         const data = await res.json()
         this.productos = data.productos || []
