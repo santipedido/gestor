@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!-- Forzar deploy limpio Netlify -->
+    <Productos />
     <Clientes />
     <div style="margin-top: 2rem; color: #555;">
       <strong>API URL usada:</strong>
@@ -10,10 +10,12 @@
 </template>
 
 <script>
+import Productos from './components/Productos.vue'
 import Clientes from './components/Clientes.vue'
 
 export default {
   components: {
+    Productos,
     Clientes
   },
   data() {
