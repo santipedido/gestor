@@ -1,6 +1,10 @@
 <template>
   <div>
     <Clientes />
+    <div style="margin-top: 2rem; color: #555;">
+      <strong>API URL usada:</strong>
+      <span>{{ apiUrl }}</span>
+    </div>
   </div>
 </template>
 
@@ -10,6 +14,11 @@ import Clientes from './components/Clientes.vue'
 export default {
   components: {
     Clientes
+  },
+  data() {
+    return {
+      apiUrl: import.meta.env.VITE_API_URL
+    }
   }
 }
 </script>
