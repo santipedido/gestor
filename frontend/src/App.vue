@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- Deploy test - {{ new Date().toISOString() }} -->
     <nav class="nav-bar">
       <button :class="{ active: vista === 'productos' }" @click="vista = 'productos'">Productos</button>
       <button :class="{ active: vista === 'clientes' }" @click="vista = 'clientes'">Clientes</button>
