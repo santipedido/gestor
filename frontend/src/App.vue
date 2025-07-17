@@ -4,8 +4,10 @@
       <button :class="{ active: vista === 'productos' }" @click="vista = 'productos'">Productos</button>
       <button :class="{ active: vista === 'clientes' }" @click="vista = 'clientes'">Clientes</button>
     </nav>
-    <Productos v-if="vista === 'productos'" />
-    <Clientes v-else />
+    <div class="main-content">
+      <Productos v-if="vista === 'productos'" />
+      <Clientes v-else />
+    </div>
   </div>
 </template>
 
@@ -33,12 +35,15 @@ html, body, #app {
   font-family: 'Poppins', 'Inter', 'Segoe UI', Arial, sans-serif;
 }
 .nav-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
   display: flex;
   gap: 1rem;
   padding: 1.5rem 0 1.5rem 1rem;
   background: #f7fafd;
   border-bottom: 1px solid #e0e0e0;
-  margin-bottom: 2rem;
+  margin-bottom: 0;
 }
 .nav-bar button {
   background: none;
@@ -59,19 +64,19 @@ html, body, #app {
 .app-container {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 1rem;
   box-sizing: border-box;
 }
 
+.main-content {
+  padding-top: 2.5rem;
+}
+
 @media (min-width: 900px) {
-  .app-container {
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 2.5rem;
+  .main-content {
+    padding-top: 3rem;
   }
 }
 </style>
