@@ -353,16 +353,22 @@ export default {
   box-shadow: 0 2px 16px rgba(0,0,0,0.08);
   padding: 2rem 2.5rem;
   width: 100%;
+  max-width: 600px;
+  margin: 0 auto 2rem auto;
   box-sizing: border-box;
 }
 .card-formulario {
   max-width: 400px;
   min-width: 0;
   flex: 1 1 320px;
+  width: 100%;
+  margin: 0 auto 2rem auto;
 }
 .card-listado {
   flex: 3 1 0;
   min-width: 0;
+  width: 100%;
+  margin: 0 auto 2rem auto;
 }
 .productos-grid {
   display: grid;
@@ -644,6 +650,13 @@ h2 {
     flex-direction: column;
     gap: 0.5rem;
     align-items: flex-start;
+  }
+}
+@media (max-width: 700px) {
+  .card, .card-formulario, .card-listado {
+    max-width: 100%;
+    padding: 1.2rem 0.7rem;
+    margin: 0 0 1.2rem 0;
   }
 }
 </style> 
