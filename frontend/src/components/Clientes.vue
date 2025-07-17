@@ -199,37 +199,38 @@ export default {
       this.error = ''
       try {
         const apiUrl = import.meta.env.VITE_API_URL
-        const params = new URLSearchParams({
-          page: this.pagina,
-          limit: this.limite,
-          search: this.busqueda
-        })
-        const res = await fetch(`${apiUrl}/clientes?${params}`)
+        // const params = new URLSearchParams({
+        //   page: this.pagina,
+        //   limit: this.limite,
+        //   search: this.busqueda
+        // })
+        // const res = await fetch(`${apiUrl}/clientes?${params}`)
+        const res = await fetch(`${apiUrl}/clientes`)
         if (!res.ok) throw new Error('No se pudo cargar la lista de clientes')
         const data = await res.json()
         this.clientes = data.clientes || []
-        this.hayMasPaginas = data.hayMasPaginas !== undefined ? data.hayMasPaginas : false
-        this.totalClientes = data.total || 0
+        // this.hayMasPaginas = data.hayMasPaginas !== undefined ? data.hayMasPaginas : false
+        // this.totalClientes = data.total || 0
       } catch (e) {
         this.error = e.message
       }
     },
-    paginaAnterior() {
-      if (this.pagina > 1) {
-        this.pagina--
-        this.cargarClientes()
-      }
-    },
-    paginaSiguiente() {
-      if (this.hayMasPaginas) {
-        this.pagina++
-        this.cargarClientes()
-      }
-    },
-    buscarClientes() {
-      this.pagina = 1
-      this.cargarClientes()
-    }
+    // paginaAnterior() {
+    //   if (this.pagina > 1) {
+    //     this.pagina--
+    //     this.cargarClientes()
+    //   }
+    // },
+    // paginaSiguiente() {
+    //   if (this.hayMasPaginas) {
+    //     this.pagina++
+    //     this.cargarClientes()
+    //   }
+    // },
+    // buscarClientes() {
+    //   this.pagina = 1
+    //   this.cargarClientes()
+    // }
   }
 }
 </script>
