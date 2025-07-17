@@ -336,7 +336,7 @@ export default {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
-.productos-container {
+/* .productos-container {
   display: flex;
   flex-direction: row;
   gap: 2.5rem;
@@ -346,7 +346,7 @@ export default {
   margin: 0 auto;
   padding: 2rem 1rem;
   box-sizing: border-box;
-}
+} */
 .card {
   background: #fff;
   border-radius: 16px;
