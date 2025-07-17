@@ -11,8 +11,9 @@ app.add_middleware(
         "https://pedidosq.netlify.app"
     ],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 
 app.include_router(clientes_router)
