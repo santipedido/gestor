@@ -84,7 +84,8 @@ export default {
       // Cargar todos los productos
       try {
         const apiUrl = import.meta.env.VITE_API_URL;
-        const res = await fetch(`${apiUrl}/productos/`);
+        const url = new URL('/productos/', apiUrl);
+        const res = await fetch(url);
         const data = await res.json();
         this.productos = data.productos || data;
         this.productosFiltrados = [];
@@ -99,7 +100,9 @@ export default {
       }
       try {
         const apiUrl = import.meta.env.VITE_API_URL;
-        const res = await fetch(`${apiUrl}/clientes?search=${this.nombreCliente}`);
+        const url = new URL('/clientes/', apiUrl);
+        url.searchParams.set('search', this.nombreCliente);
+        const res = await fetch(url);
         const data = await res.json();
         this.clientesEncontrados = data.clientes || data;
       } catch (e) {
@@ -171,6 +174,7 @@ export default {
       this.error = '';
       try {
         const apiUrl = import.meta.env.VITE_API_URL;
+        const url = new URL('/pedidos/crear', apiUrl);
         const body = {
           cliente_id: this.cliente.id,
           productos: this.pedido.productos.map(p => ({
@@ -179,7 +183,7 @@ export default {
             cantidad: p.cantidad
           }))
         };
-        const res = await fetch(`${apiUrl}/pedidos/crear`, {
+        const res = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body)
