@@ -3,20 +3,26 @@
     <h2>Crear Pedido</h2>
     <form @submit.prevent="agregarProducto">
       <div class="form-group">
-        <label>Cliente (teléfono):</label>
-        <input v-model="telefonoCliente" placeholder="Buscar por teléfono" @blur="buscarCliente" required />
-        <span v-if="cliente">Cliente: {{ cliente.nombre }}</span>
-        <span v-else-if="telefonoCliente && !buscandoCliente">No encontrado</span>
+        <label>Cliente (nombre):</label>
+        <input v-model="nombreCliente" placeholder="Buscar por nombre" @input="buscarCliente" required />
+        <div v-if="clientesEncontrados.length > 0 && nombreCliente" class="resultados-busqueda">
+          <div v-for="cliente in clientesEncontrados" :key="cliente.id" 
+               @click="seleccionarCliente(cliente)" class="resultado-item">
+            {{ cliente.nombre }} - {{ cliente.telefono }}
+          </div>
+        </div>
+        <span v-if="cliente">Cliente seleccionado: {{ cliente.nombre }} ({{ cliente.telefono }})</span>
       </div>
       <div class="form-group">
         <label>Producto:</label>
-        <select v-model="productoSeleccionadoId" @change="onProductoChange">
-          <option disabled value="">Selecciona un producto</option>
-          <option v-for="prod in productos" :key="prod.id" :value="prod.id">
+        <input v-model="busquedaProducto" placeholder="Buscar producto por nombre" @input="filtrarProductos" />
+        <div v-if="productosFiltrados.length > 0 && busquedaProducto" class="resultados-busqueda">
+          <div v-for="prod in productosFiltrados" :key="prod.id" 
+               @click="seleccionarProducto(prod)" class="resultado-item">
             {{ prod.nombre }} ({{ prod.precio }} c/u)
             <span v-if="prod.unidades_por_paca && prod.unidades_por_paca > 0"> - {{ prod.unidades_por_paca }} x paca</span>
-          </option>
-        </select>
+          </div>
+        </div>
       </div>
       <div class="form-group" v-if="productoActual">
         <label>Tipo:</label>
@@ -52,10 +58,12 @@ export default {
   name: 'Pedidos',
   data() {
     return {
-      telefonoCliente: '',
+      nombreCliente: '',
       cliente: null,
-      buscandoCliente: false,
+      clientesEncontrados: [],
       productos: [],
+      productosFiltrados: [],
+      busquedaProducto: '',
       productoSeleccionadoId: '',
       productoActual: null,
       tipoSeleccionado: 'unidad',
@@ -79,33 +87,47 @@ export default {
         const res = await fetch(`${apiUrl}/productos/`);
         const data = await res.json();
         this.productos = data.productos || data;
+        this.productosFiltrados = [];
       } catch (e) {
         this.error = 'Error cargando productos';
       }
     },
     async buscarCliente() {
-      if (!this.telefonoCliente) return;
-      this.buscandoCliente = true;
-      this.cliente = null;
-      this.error = '';
+      if (!this.nombreCliente || this.nombreCliente.length < 2) {
+        this.clientesEncontrados = [];
+        return;
+      }
       try {
         const apiUrl = import.meta.env.VITE_API_URL;
-        const res = await fetch(`${apiUrl}/clientes?search=${this.telefonoCliente}`);
+        const res = await fetch(`${apiUrl}/clientes?search=${this.nombreCliente}`);
         const data = await res.json();
-        if (data && data.clientes && data.clientes.length > 0) {
-          // Busca coincidencia exacta por teléfono
-          this.cliente = data.clientes.find(c => c.telefono === this.telefonoCliente) || null;
-        } else {
-          this.cliente = null;
-        }
+        this.clientesEncontrados = data.clientes || data;
       } catch (e) {
         this.error = 'Error buscando cliente';
-      } finally {
-        this.buscandoCliente = false;
+        this.clientesEncontrados = [];
       }
     },
-    onProductoChange() {
-      this.productoActual = this.productos.find(p => p.id === this.productoSeleccionadoId);
+    seleccionarCliente(cliente) {
+      this.cliente = cliente;
+      this.nombreCliente = cliente.nombre;
+      this.clientesEncontrados = [];
+      this.error = '';
+    },
+    filtrarProductos() {
+      if (!this.busquedaProducto || this.busquedaProducto.length < 2) {
+        this.productosFiltrados = [];
+        return;
+      }
+      const busqueda = this.busquedaProducto.toLowerCase();
+      this.productosFiltrados = this.productos.filter(prod => 
+        prod.nombre.toLowerCase().includes(busqueda)
+      );
+    },
+    seleccionarProducto(producto) {
+      this.productoActual = producto;
+      this.productoSeleccionadoId = producto.id;
+      this.busquedaProducto = producto.nombre;
+      this.productosFiltrados = [];
       this.tipoSeleccionado = 'unidad';
       this.cantidad = 1;
     },
@@ -128,6 +150,7 @@ export default {
       this.productoActual = null;
       this.tipoSeleccionado = 'unidad';
       this.cantidad = 1;
+      this.busquedaProducto = '';
       this.error = '';
     },
     eliminarProducto(idx) {
@@ -166,7 +189,7 @@ export default {
         this.mensaje = `Pedido creado correctamente (ID: ${data.pedido_id})`;
         this.pedido.productos = [];
         this.cliente = null;
-        this.telefonoCliente = '';
+        this.nombreCliente = '';
       } catch (e) {
         this.error = e.message || 'Error enviando pedido';
       } finally {
@@ -188,6 +211,7 @@ export default {
 }
 .form-group {
   margin-bottom: 1rem;
+  position: relative;
 }
 input, select {
   padding: 0.5rem;
@@ -195,6 +219,31 @@ input, select {
   border: 1px solid #ccc;
   width: 100%;
   font-size: 1rem;
+}
+.resultados-busqueda {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ccc;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.resultado-item {
+  padding: 0.5rem;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+}
+.resultado-item:hover {
+  background: #f5f5f5;
+}
+.resultado-item:last-child {
+  border-bottom: none;
 }
 button {
   background: #2d8cf0;
