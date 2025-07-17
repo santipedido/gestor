@@ -654,9 +654,33 @@ h2 {
 }
 @media (max-width: 700px) {
   .card, .card-formulario, .card-listado {
-    max-width: 100%;
-    padding: 1.2rem 0.7rem;
-    margin: 0 0 1.2rem 0;
+    max-width: 100% !important;
+    margin: 0 0 1.2rem 0 !important;
+    padding: 0.7rem 0.3rem !important;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+  }
+  h2 {
+    font-size: 1.25rem !important;
+    margin-bottom: 1rem !important;
+  }
+  .form-group label {
+    font-size: 1.05rem !important;
+  }
+  .form-group input {
+    font-size: 1.05rem !important;
+    padding: 0.6rem 0.7rem !important;
+  }
+  .btn {
+    font-size: 1.05rem !important;
+    padding: 0.5rem 1.1rem !important;
+  }
+  .productos-grid {
+    gap: 1.2rem !important;
+    margin-top: 1rem !important;
+  }
+  .tarjeta-producto {
+    padding: 0.8rem 0.5rem !important;
+    gap: 0.5rem !important;
   }
 }
 </style> 
