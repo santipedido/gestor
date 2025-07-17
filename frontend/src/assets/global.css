@@ -30,18 +30,6 @@ h1, h2, h3, h4, h5 {
   margin: 0 0 1.2rem 0;
 }
 
-/* ====== Card ====== */
-.card {
-  background: var(--color-card);
-  border-radius: var(--radius);
-  box-shadow: var(--color-shadow);
-  padding: 2rem 2.5rem;
-  width: 100%;
-  max-width: 600px;
-  margin: 0 auto 2rem auto;
-  box-sizing: border-box;
-}
-
 /* ====== Button ====== */
 .btn {
   padding: 0.6rem 1.5rem;
@@ -88,27 +76,247 @@ input:focus, select:focus, textarea:focus {
   background: #fff;
 }
 
-/* ====== Responsive ====== */
-@media (max-width: 700px) {
+/* ====== Layout principal y cabecera ====== */
+.app-root {
+  min-height: 100vh;
+  background: var(--color-bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.main-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #fff;
+  box-shadow: var(--color-shadow);
+  width: 100%;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1rem 1.5rem;
+  width: 100%;
+}
+
+.logo {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: 0.01em;
+}
+
+.nav-bar {
+  display: flex;
+  gap: 1rem;
+}
+
+.nav-bar button {
+  background: none;
+  border: none;
+  font-size: 1.08rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  cursor: pointer;
+  padding: 0.5rem 1.2rem;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s, color 0.2s;
+  letter-spacing: 0.01em;
+}
+
+.nav-bar button.active, .nav-bar button:hover {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.main-content {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1rem 2rem 1rem;
+  box-sizing: border-box;
+}
+
+/* ====== Tarjetas y grids ====== */
+.card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(30, 64, 175, 0.08);
+  padding: 2.2rem 2.5rem;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto 2.2rem auto;
+  box-sizing: border-box;
+}
+.card-formulario {
+  max-width: 420px;
+  min-width: 0;
+  flex: 1 1 320px;
+  width: 100%;
+  margin: 0 auto 2rem auto;
+}
+.card-listado {
+  flex: 3 1 0;
+  min-width: 0;
+  width: 100%;
+  margin: 0 auto 2rem auto;
+}
+
+.grid-responsive {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  width: 100%;
+  margin-top: 2rem;
+  box-sizing: border-box;
+}
+@media (min-width: 700px) {
+  .grid-responsive {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (min-width: 1100px) {
+  .grid-responsive {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  }
+}
+
+.tarjeta-producto, .tarjeta-cliente {
+  background: #f7fafd;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(30, 64, 175, 0.06);
+  padding: 1.5rem 1.2rem;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  box-sizing: border-box;
+  transition: box-shadow 0.18s, transform 0.18s;
+}
+.tarjeta-producto:hover, .tarjeta-cliente:hover {
+  box-shadow: 0 6px 24px rgba(30, 64, 175, 0.13);
+  transform: translateY(-2px) scale(1.01);
+}
+
+/* ====== Formularios ====== */
+.form-group {
+  margin-bottom: 1.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.form-group label {
+  font-size: 1.08rem;
+  color: #64748b;
+  font-weight: 600;
+}
+.form-group input {
+  padding: 0.8rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 1rem;
+  font-size: 1.08rem;
+  outline: none;
+  background: #f8fafc;
+  color: #22223b;
+  transition: border 0.2s, background 0.2s;
+  box-shadow: 0 1px 4px rgba(30, 64, 175, 0.04);
+}
+.form-group input:focus {
+  border-color: var(--color-primary);
+  background: #fff;
+}
+.form-group input.error {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 1.2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ====== Mensajes ====== */
+.success-msg, .success-msg.show-msg {
+  background: #eafaf1;
+  color: #27ae60;
+  border: 2px solid #27ae60;
+  padding: 0.7rem 1.2rem;
+  border-radius: 0.8rem;
+  margin-top: 1rem;
+  font-size: 1.07rem;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+  display: inline-block;
+}
+.error-msg, .error-msg.show-msg {
+  background: #fff0f0;
+  color: #e74c3c;
+  border: 2px solid #e74c3c;
+  padding: 0.7rem 1.2rem;
+  border-radius: 0.8rem;
+  margin-top: 1rem;
+  font-size: 1.07rem;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+  display: inline-block;
+}
+.loading-msg {
+  color: var(--color-primary);
+  font-size: 1.05em;
+  text-align: center;
+  font-weight: 700;
+}
+
+/* ====== Responsive ajustes ====== */
+@media (max-width: 900px) {
+  .card-formulario {
+    max-width: 100%;
+    margin-bottom: 1.5rem;
+  }
+}
+@media (max-width: 600px) {
   .card {
+    padding: 1rem;
+  }
+  .grid-responsive {
+    flex-direction: column;
+    gap: 0.8rem;
+    display: flex;
+  }
+  .tarjeta-producto, .tarjeta-cliente {
+    min-width: unset;
+    padding: 0.8rem;
+  }
+  .form-group input {
+    font-size: 0.98rem;
+    padding: 0.4rem;
+  }
+  .form-actions {
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+}
+@media (max-width: 700px) {
+  .card, .card-formulario, .card-listado {
     max-width: 100% !important;
     margin: 0 0 1.2rem 0 !important;
     padding: 0.7rem 0.3rem !important;
     box-shadow: 0 1px 6px rgba(0,0,0,0.07);
   }
-  h2 {
-    font-size: 1.25rem !important;
-    margin-bottom: 1rem !important;
+  .grid-responsive {
+    gap: 1.2rem !important;
+    margin-top: 1rem !important;
   }
-  label {
-    font-size: 1.05rem !important;
-  }
-  input, select, textarea {
-    font-size: 1.05rem !important;
-    padding: 0.6rem 0.7rem !important;
-  }
-  .btn {
-    font-size: 1.05rem !important;
-    padding: 0.5rem 1.1rem !important;
+  .tarjeta-producto, .tarjeta-cliente {
+    padding: 0.8rem 0.5rem !important;
+    gap: 0.5rem !important;
   }
 } 
