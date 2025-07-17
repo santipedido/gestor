@@ -366,11 +366,23 @@ export default {
 }
 .productos-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: 1fr;
   gap: 2rem;
   width: 100%;
   margin-top: 2rem;
   box-sizing: border-box;
+}
+
+@media (min-width: 700px) {
+  .productos-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1100px) {
+  .productos-grid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  }
 }
 .tarjeta-producto {
   background: #f8fafc;

@@ -1,7 +1,11 @@
 <template>
   <div class="app-container">
-    <Productos />
-    <Clientes />
+    <nav class="nav-bar">
+      <button :class="{ active: vista === 'productos' }" @click="vista = 'productos'">Productos</button>
+      <button :class="{ active: vista === 'clientes' }" @click="vista = 'clientes'">Clientes</button>
+    </nav>
+    <Productos v-if="vista === 'productos'" />
+    <Clientes v-else />
   </div>
 </template>
 
@@ -13,6 +17,11 @@ export default {
   components: {
     Productos,
     Clientes
+  },
+  data() {
+    return {
+      vista: 'productos'
+    }
   }
 }
 </script>
