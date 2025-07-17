@@ -1,27 +1,32 @@
 <template>
-  <div>
-    <!-- Deploy test - {{ new Date().toISOString() }} -->
-    <nav class="nav-bar">
-      <button :class="{ active: vista === 'productos' }" @click="vista = 'productos'">Productos</button>
-      <button :class="{ active: vista === 'clientes' }" @click="vista = 'clientes'">Clientes</button>
-    </nav>
-    <Productos v-if="vista === 'productos'" />
-    <Clientes v-else />
+  <div style="text-align:center; margin-top: 50px;">
+    <h1>Ping Pong Frontend ↔ Backend</h1>
+    <button @click="pingBackend">Probar conexión</button>
+    <p v-if="mensaje">{{ mensaje }}</p>
+    <p v-if="error" style="color:red;">{{ error }}</p>
   </div>
 </template>
 
 <script>
-import Productos from './components/Productos.vue'
-import Clientes from './components/Clientes.vue'
-
 export default {
-  components: {
-    Productos,
-    Clientes
-  },
   data() {
     return {
-      vista: 'productos'
+      mensaje: '',
+      error: ''
+    }
+  },
+  methods: {
+    async pingBackend() {
+      this.mensaje = '';
+      this.error = '';
+      try {
+        const res = await fetch(import.meta.env.VITE_API_URL + '/');
+        if (!res.ok) throw new Error('Error en la respuesta del backend');
+        const data = await res.json();
+        this.mensaje = data.mensaje || JSON.stringify(data);
+      } catch (e) {
+        this.error = e.message;
+      }
     }
   }
 }
