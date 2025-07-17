@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="app-container">
     <Productos />
     <Clientes />
   </div>
@@ -45,5 +45,24 @@ html, body, #app {
 .nav-bar button.active, .nav-bar button:hover {
   background: #2980b9;
   color: #fff;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+@media (min-width: 900px) {
+  .app-container {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 2.5rem;
+  }
 }
 </style>
