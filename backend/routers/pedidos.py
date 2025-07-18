@@ -1,8 +1,38 @@
 from fastapi import APIRouter, HTTPException
 from database import supabase
 from schemas import PedidoCreate
+from typing import Optional
 
 router = APIRouter(prefix="/pedidos", tags=["pedidos"])
+
+@router.get("/")
+def listar_pedidos(estado: Optional[str] = None):
+    try:
+        # Construir query base
+        query = supabase.table("pedidos").select("*").order("fecha", desc=True).limit(10)
+        
+        # Aplicar filtro por estado si se proporciona
+        if estado:
+            if estado not in ["pendiente", "en proceso"]:
+                raise HTTPException(status_code=400, detail="Estado debe ser 'pendiente' o 'en proceso'")
+            query = query.eq("estado", estado)
+        
+        result = query.execute()
+        pedidos = result.data
+        
+        # Obtener información del cliente para cada pedido
+        for pedido in pedidos:
+            if pedido.get("cliente_id"):
+                cliente = supabase.table("clientes").select("nombre, telefono").eq("id", pedido["cliente_id"]).single().execute()
+                if cliente.data:
+                    pedido["cliente"] = cliente.data
+        
+        return {
+            "pedidos": pedidos,
+            "total": len(pedidos)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @router.post("/crear")
 def crear_pedido(pedido: PedidoCreate):
