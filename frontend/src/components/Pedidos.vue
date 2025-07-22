@@ -130,22 +130,38 @@
                   </select>
                 </div>
                 <h6>Productos:</h6>
-                <div v-for="(prod, idx) in editarPedido.productos" :key="idx" class="form-group">
-                  <label>Producto:</label>
-                  <input v-model="prod.busqueda" placeholder="Buscar producto por nombre" @input="filtrarEditarProductos(idx)" :readonly="true" />
-                  <div v-if="prod.productosFiltrados && prod.busqueda && prod.productosFiltrados.length > 0" class="resultados-busqueda">
-                    <div v-for="p in prod.productosFiltrados" :key="p.id" @click="seleccionarEditarProducto(idx, p)" class="resultado-item">
+                <div class="editar-productos">
+                  <label>Buscar producto en el pedido:</label>
+                  <input v-model="busquedaEditarProducto" placeholder="Buscar producto por nombre en el pedido" />
+                  <div v-if="productosFiltradosEdicion.length === 0">
+                    <span class="mensaje-error">El producto no está en la lista de este pedido.</span>
+                  </div>
+                  <div v-for="(prod, idx) in productosPaginadosEdicion" :key="idx" class="form-group">
+                    <label>Producto:</label>
+                    <input :value="prod.nombre" readonly />
+                    <label>Tipo:</label>
+                    <select v-model="prod.tipo">
+                      <option value="unidad">Unidad</option>
+                      <option v-if="getProductoPorId(prod.producto_id)?.unidades_por_paca > 0" value="paca">Paca</option>
+                    </select>
+                    <label>Cantidad:</label>
+                    <input type="number" v-model.number="prod.cantidad" min="1" />
+                    <button type="button" @click="eliminarEditarProductoPorId(prod.producto_id)">Eliminar</button>
+                  </div>
+                  <div class="paginacion">
+                    <button @click="cambiarPaginaEdicion(paginaEdicion - 1)" :disabled="paginaEdicion <= 1">Anterior</button>
+                    <span>Página {{ paginaEdicion }} de {{ totalPaginasEdicion }}</span>
+                    <button @click="cambiarPaginaEdicion(paginaEdicion + 1)" :disabled="paginaEdicion >= totalPaginasEdicion">Siguiente</button>
+                  </div>
+                  <hr />
+                  <label>Agregar producto al pedido:</label>
+                  <input v-model="busquedaAgregarProducto" placeholder="Buscar producto para agregar" @input="filtrarAgregarProductos" />
+                  <div v-if="mensajeAgregarProducto" class="mensaje-error">{{ mensajeAgregarProducto }}</div>
+                  <div v-if="productosFiltradosAgregar.length > 0">
+                    <div v-for="p in productosFiltradosAgregar" :key="p.id" class="resultado-item" @click="agregarProductoAEdicion(p)">
                       {{ p.nombre }}
                     </div>
                   </div>
-                  <label>Tipo:</label>
-                  <select v-model="prod.tipo">
-                    <option value="unidad">Unidad</option>
-                    <option v-if="getProductoPorId(prod.producto_id)?.unidades_por_paca > 0" value="paca">Paca</option>
-                  </select>
-                  <label>Cantidad:</label>
-                  <input type="number" v-model.number="prod.cantidad" min="1" />
-                  <button type="button" @click="eliminarEditarProducto(idx)" disabled>Eliminar</button>
                 </div>
                 <button type="submit" :disabled="guardandoEdicion">Guardar cambios</button>
               </form>
@@ -256,7 +272,13 @@ export default {
       eliminarPedidoId: null,
       eliminando: false,
       paginaActual: 1,
-      totalPaginas: 1
+      totalPaginas: 1,
+      busquedaEditarProducto: '',
+      paginaEdicion: 1,
+      productosPorPaginaEdicion: 5,
+      busquedaAgregarProducto: '',
+      productosFiltradosAgregar: [],
+      mensajeAgregarProducto: ''
     }
   },
   computed: {
@@ -277,6 +299,21 @@ export default {
           : (producto ? producto.precio : 0);
         return total + (precioUnitario * prod.cantidad);
       }, 0);
+    },
+    productosFiltradosEdicion() {
+      if (!this.editarPedido || !this.editarPedido.productos) return [];
+      if (!this.busquedaEditarProducto) return this.editarPedido.productos;
+      return this.editarPedido.productos.filter(prod => {
+        const producto = this.getProductoPorId(prod.producto_id);
+        return producto && producto.nombre.toLowerCase().includes(this.busquedaEditarProducto.toLowerCase());
+      });
+    },
+    productosPaginadosEdicion() {
+      const start = (this.paginaEdicion - 1) * this.productosPorPaginaEdicion;
+      return this.productosFiltradosEdicion.slice(start, start + this.productosPorPaginaEdicion);
+    },
+    totalPaginasEdicion() {
+      return Math.max(1, Math.ceil(this.productosFiltradosEdicion.length / this.productosPorPaginaEdicion));
     }
   },
   mounted() {
@@ -485,6 +522,11 @@ export default {
         this.editarPedidoId = null;
         this.editarPedido = null;
         this.editarError = '';
+        this.busquedaEditarProducto = '';
+        this.paginaEdicion = 1;
+        this.busquedaAgregarProducto = '';
+        this.productosFiltradosAgregar = [];
+        this.mensajeAgregarProducto = '';
         return;
       }
       this.editarPedidoId = id;
@@ -603,6 +645,56 @@ export default {
       if (nuevaPagina < 1 || nuevaPagina > this.totalPaginas) return;
       this.paginaActual = nuevaPagina;
       this.cargarPedidos();
+    },
+    cambiarPaginaEdicion(nuevaPagina) {
+      if (nuevaPagina < 1 || nuevaPagina > this.totalPaginasEdicion) return;
+      this.paginaEdicion = nuevaPagina;
+    },
+    eliminarEditarProductoPorId(producto_id) {
+      this.editarPedido.productos = this.editarPedido.productos.filter(p => p.producto_id !== producto_id);
+      // Ajustar paginación si es necesario
+      if (this.paginaEdicion > this.totalPaginasEdicion) {
+        this.paginaEdicion = this.totalPaginasEdicion;
+      }
+    },
+    filtrarAgregarProductos() {
+      this.mensajeAgregarProducto = '';
+      if (!this.busquedaAgregarProducto || this.busquedaAgregarProducto.length < 2) {
+        this.productosFiltradosAgregar = [];
+        return;
+      }
+      const yaEnPedido = this.editarPedido.productos.map(p => p.producto_id);
+      this.productosFiltradosAgregar = this.productos.filter(p =>
+        p.nombre.toLowerCase().includes(this.busquedaAgregarProducto.toLowerCase()) &&
+        !yaEnPedido.includes(p.id)
+      );
+      if (this.productosFiltradosAgregar.length === 0) {
+        // Si el producto ya está en el pedido
+        if (this.productos.some(p => p.nombre.toLowerCase().includes(this.busquedaAgregarProducto.toLowerCase()))) {
+          this.mensajeAgregarProducto = 'El producto ya está en la lista del pedido.';
+        } else {
+          this.mensajeAgregarProducto = 'El producto no existe.';
+        }
+      }
+    },
+    agregarProductoAEdicion(producto) {
+      // Validar que no esté ya en la lista
+      if (this.editarPedido.productos.some(p => p.producto_id === producto.id)) {
+        this.mensajeAgregarProducto = 'El producto ya está en la lista del pedido.';
+        return;
+      }
+      this.editarPedido.productos.push({
+        producto_id: producto.id,
+        tipo: producto.unidades_por_paca > 0 ? 'unidad' : 'unidad',
+        cantidad: 1
+      });
+      this.busquedaAgregarProducto = '';
+      this.productosFiltradosAgregar = [];
+      this.mensajeAgregarProducto = '';
+      // Ajustar paginación si es necesario
+      if (this.paginaEdicion < this.totalPaginasEdicion) {
+        this.paginaEdicion = this.totalPaginasEdicion;
+      }
     }
   }
 }
@@ -833,6 +925,45 @@ button:disabled {
 }
 .editar-formulario h5 {
   margin-top: 0;
+}
+.editar-productos {
+  margin-top: 1rem;
+}
+.editar-productos label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+.editar-productos input[type="text"] {
+  width: calc(100% - 1rem); /* Adjust for button */
+  margin-bottom: 0.5rem;
+}
+.editar-productos select {
+  width: calc(100% - 1rem); /* Adjust for button */
+  margin-bottom: 0.5rem;
+}
+.editar-productos input[type="number"] {
+  width: calc(100% - 1rem); /* Adjust for button */
+  margin-bottom: 0.5rem;
+}
+.editar-productos button {
+  width: calc(100% - 1rem); /* Adjust for button */
+  margin-top: 0.5rem;
+}
+.editar-productos .paginacion {
+  margin-top: 1rem;
+}
+.editar-productos .paginacion button {
+  background: #2d8cf0;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1.2rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.editar-productos .paginacion button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
 }
 .modal-eliminar {
   position: fixed;
