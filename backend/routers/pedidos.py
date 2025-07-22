@@ -265,3 +265,18 @@ def actualizar_pedido(pedido: PedidoUpdate = Body(...)):
         return {"mensaje": "Pedido actualizado correctamente"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@router.delete("/eliminar/{id}")
+def eliminar_pedido(id: int):
+    try:
+        # Verificar que el pedido existe
+        pedido_result = supabase.table("pedidos").select("id").eq("id", id).single().execute()
+        if not pedido_result.data:
+            raise HTTPException(status_code=404, detail="Pedido no encontrado")
+        # Eliminar productos asociados
+        supabase.table("pedido_productos").delete().eq("pedido_id", id).execute()
+        # Eliminar el pedido
+        supabase.table("pedidos").delete().eq("id", id).execute()
+        return {"mensaje": "Pedido eliminado correctamente"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))

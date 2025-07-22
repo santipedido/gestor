@@ -91,7 +91,7 @@
             <button class="btn-editar" @click="toggleEditarPedido(pedido.id)">
               {{ editarPedidoId === pedido.id ? 'Cancelar edición' : 'Editar' }}
             </button>
-            <button class="btn-eliminar">Eliminar</button>
+            <button class="btn-eliminar" @click="confirmarEliminarPedido(pedido.id)">Eliminar</button>
           </div>
 
           <!-- Sección expandible de detalles -->
@@ -152,6 +152,14 @@
             </div>
           </div>
 
+        </div>
+      </div>
+      <!-- Modal de confirmación de eliminación -->
+      <div v-if="eliminarPedidoId !== null" class="modal-eliminar">
+        <div class="modal-contenido">
+          <p>¿Estás seguro de que deseas eliminar este pedido?</p>
+          <button @click="eliminarPedido">Sí, eliminar</button>
+          <button @click="eliminarPedidoId = null">Cancelar</button>
         </div>
       </div>
     </div>
@@ -238,7 +246,9 @@ export default {
       editarPedido: null,
       editarCargando: false,
       editarError: '',
-      guardandoEdicion: false
+      guardandoEdicion: false,
+      eliminarPedidoId: null,
+      eliminando: false
     }
   },
   computed: {
@@ -558,6 +568,25 @@ export default {
       } finally {
         this.guardandoEdicion = false;
       }
+    },
+    confirmarEliminarPedido(id) {
+      this.eliminarPedidoId = id;
+    },
+    async eliminarPedido() {
+      if (!this.eliminarPedidoId) return;
+      this.eliminando = true;
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL;
+        const url = new URL(`/pedidos/eliminar/${this.eliminarPedidoId}`, apiUrl);
+        const res = await fetch(url, { method: 'DELETE' });
+        if (!res.ok) throw new Error('No se pudo eliminar el pedido');
+        this.eliminarPedidoId = null;
+        this.cargarPedidos();
+      } catch (e) {
+        alert(e.message || 'Error eliminando pedido');
+      } finally {
+        this.eliminando = false;
+      }
     }
   }
 }
@@ -788,6 +817,25 @@ button:disabled {
 }
 .editar-formulario h5 {
   margin-top: 0;
+}
+.modal-eliminar {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+.modal-contenido {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  text-align: center;
+}
+.modal-contenido button {
+  margin: 0 1rem;
 }
 </style>
 
