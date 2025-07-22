@@ -542,14 +542,21 @@ export default {
         this.editarPedido = {
           id: data.pedido.id,
           estado: data.pedido.estado,
-          productos: data.productos.map(p => ({
-            producto_id: this.getProductoIdPorNombre(p.nombre),
-            tipo: p.tipo,
-            cantidad: p.cantidad,
-            busqueda: p.nombre,
-            productosFiltrados: []
-          }))
+          productos: data.productos.map(p => {
+            const prodCatalogo = this.productos.find(prod => prod.nombre === p.nombre);
+            return {
+              producto_id: prodCatalogo ? prodCatalogo.id : null,
+              nombre: p.nombre,
+              tipo: p.tipo,
+              cantidad: p.cantidad
+            };
+          })
         };
+        this.busquedaEditarProducto = '';
+        this.paginaEdicion = 1;
+        this.busquedaAgregarProducto = '';
+        this.productosFiltradosAgregar = [];
+        this.mensajeAgregarProducto = '';
       } catch (e) {
         this.editarError = e.message || 'Error cargando datos para editar';
       } finally {
