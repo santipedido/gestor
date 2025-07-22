@@ -1,10 +1,11 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Body
 from database import supabase
 from schemas import PedidoCreate
 from typing import Optional
 from datetime import datetime
 import os
 import requests
+from pydantic import BaseModel
 
 router = APIRouter(prefix="/pedidos", tags=["pedidos"])
 
@@ -44,6 +45,16 @@ def enviar_mensaje_whatsapp_greenapi(mensaje):
     except Exception as e:
         print(f"Error enviando mensaje WhatsApp: {e}")
         return False
+
+class PedidoProductoUpdate(BaseModel):
+    producto_id: int
+    tipo: str  # 'unidad' o 'paca'
+    cantidad: int
+
+class PedidoUpdate(BaseModel):
+    id: int
+    estado: Optional[str] = None
+    productos: Optional[list[PedidoProductoUpdate]] = None
 
 @router.get("/")
 def listar_pedidos(estado: Optional[str] = None):
@@ -211,3 +222,46 @@ def crear_pedido(pedido: PedidoCreate):
         "mensaje_whatsapp": mensaje_whatsapp,
         "whatsapp_enviado": enviado
     }
+
+@router.put("/actualizar")
+def actualizar_pedido(pedido: PedidoUpdate = Body(...)):
+    try:
+        # Verificar que el pedido existe
+        pedido_result = supabase.table("pedidos").select("*").eq("id", pedido.id).single().execute()
+        if not pedido_result.data:
+            raise HTTPException(status_code=404, detail="Pedido no encontrado")
+        # Actualizar estado si se proporciona
+        if pedido.estado:
+            if pedido.estado not in ["pendiente", "en proceso"]:
+                raise HTTPException(status_code=400, detail="Estado debe ser 'pendiente' o 'en proceso'")
+            supabase.table("pedidos").update({"estado": pedido.estado}).eq("id", pedido.id).execute()
+        # Actualizar productos si se proporciona
+        if pedido.productos is not None:
+            # Eliminar productos actuales
+            supabase.table("pedido_productos").delete().eq("pedido_id", pedido.id).execute()
+            # Insertar nuevos productos
+            productos_a_insertar = []
+            for prod in pedido.productos:
+                producto_db = supabase.table("productos").select("precio, unidades_por_paca").eq("id", prod.producto_id).single().execute().data
+                if not producto_db:
+                    raise HTTPException(status_code=404, detail=f"Producto {prod.producto_id} no encontrado")
+                if prod.tipo == "paca":
+                    if not producto_db["unidades_por_paca"] or producto_db["unidades_por_paca"] <= 0:
+                        raise HTTPException(status_code=400, detail=f"El producto {prod.producto_id} no se vende por paca")
+                    precio_unitario = float(producto_db["precio"]) * int(producto_db["unidades_por_paca"])
+                elif prod.tipo == "unidad":
+                    precio_unitario = float(producto_db["precio"])
+                else:
+                    raise HTTPException(status_code=400, detail="Tipo inválido (debe ser 'unidad' o 'paca')")
+                productos_a_insertar.append({
+                    "pedido_id": pedido.id,
+                    "producto_id": prod.producto_id,
+                    "tipo": prod.tipo,
+                    "cantidad": prod.cantidad,
+                    "precio_unitario": precio_unitario
+                })
+            if productos_a_insertar:
+                supabase.table("pedido_productos").insert(productos_a_insertar).execute()
+        return {"mensaje": "Pedido actualizado correctamente"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))

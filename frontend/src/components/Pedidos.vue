@@ -88,7 +88,9 @@
             <button class="btn-ver" @click="toggleDetallesPedido(pedido.id)">
               {{ detallesPedidoId === pedido.id ? 'Ocultar detalles' : 'Ver detalles' }}
             </button>
-            <button class="btn-editar">Editar</button>
+            <button class="btn-editar" @click="toggleEditarPedido(pedido.id)">
+              {{ editarPedidoId === pedido.id ? 'Cancelar edición' : 'Editar' }}
+            </button>
             <button class="btn-eliminar">Eliminar</button>
           </div>
 
@@ -112,6 +114,47 @@
               </div>
             </div>
           </div>
+
+          <!-- Sección expandible de edición -->
+          <div v-if="editarPedidoId === pedido.id" class="editar-expandido">
+            <div v-if="editarCargando" class="cargando">Cargando datos para editar...</div>
+            <div v-else-if="editarError" class="mensaje-error">{{ editarError }}</div>
+            <div v-else-if="editarPedido" class="editar-formulario">
+              <h5>Editar pedido</h5>
+              <form @submit.prevent="guardarEdicionPedido">
+                <div class="form-group">
+                  <label>Estado:</label>
+                  <select v-model="editarPedido.estado">
+                    <option value="pendiente">Pendiente</option>
+                    <option value="en proceso">En Proceso</option>
+                  </select>
+                </div>
+                <h6>Productos:</h6>
+                <div v-for="(prod, idx) in editarPedido.productos" :key="idx" class="form-group">
+                  <label>Producto:</label>
+                  <select v-model.number="prod.producto_id" @change="onEditarProductoChange(idx)">
+                    <option v-for="p in productos" :key="p.id" :value="p.id">
+                      {{ p.nombre }}
+                    </option>
+                  </select>
+                  <label>Tipo:</label>
+                  <select v-model="prod.tipo">
+                    <option value="unidad">Unidad</option>
+                    <option v-if="getProductoPorId(prod.producto_id)?.unidades_por_paca > 0" value="paca">Paca</option>
+                  </select>
+                  <label>Cantidad:</label>
+                  <input type="number" v-model.number="prod.cantidad" min="1" />
+                  <button type="button" @click="eliminarEditarProducto(idx)">Eliminar</button>
+                </div>
+                <button type="button" @click="agregarEditarProducto">Agregar producto</button>
+                <div class="total-pedido">
+                  <strong>Total: ${{ totalEditarPedido.toLocaleString() }}</strong>
+                </div>
+                <button type="submit" :disabled="guardandoEdicion">Guardar cambios</button>
+              </form>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -193,7 +236,12 @@ export default {
       telefonoHistorial: '',
       historialPedidos: null,
       cargandoHistorial: false,
-      historialError: ''
+      historialError: '',
+      editarPedidoId: null,
+      editarPedido: null,
+      editarCargando: false,
+      editarError: '',
+      guardandoEdicion: false
     }
   },
   computed: {
@@ -202,6 +250,16 @@ export default {
         let precioUnitario = prod.tipo === 'paca' 
           ? (prod.precio * prod.unidades_por_paca) 
           : prod.precio;
+        return total + (precioUnitario * prod.cantidad);
+      }, 0);
+    },
+    totalEditarPedido() {
+      if (!this.editarPedido || !this.editarPedido.productos) return 0;
+      return this.editarPedido.productos.reduce((total, prod) => {
+        const producto = this.getProductoPorId(prod.producto_id);
+        let precioUnitario = prod.tipo === 'paca' && producto && producto.unidades_por_paca > 0
+          ? (producto.precio * producto.unidades_por_paca)
+          : (producto ? producto.precio : 0);
         return total + (precioUnitario * prod.cantidad);
       }, 0);
     }
@@ -402,6 +460,89 @@ export default {
         this.historialError = e.message || 'Error buscando historial';
       } finally {
         this.cargandoHistorial = false;
+      }
+    },
+    async toggleEditarPedido(id) {
+      if (this.editarPedidoId === id) {
+        this.editarPedidoId = null;
+        this.editarPedido = null;
+        this.editarError = '';
+        return;
+      }
+      this.editarPedidoId = id;
+      this.editarPedido = null;
+      this.editarCargando = true;
+      this.editarError = '';
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL;
+        const url = new URL(`/pedidos/${id}`, apiUrl);
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('No se pudo obtener el pedido para editar');
+        const data = await res.json();
+        this.editarPedido = {
+          id: data.pedido.id,
+          estado: data.pedido.estado,
+          productos: data.productos.map(p => ({
+            producto_id: this.getProductoIdPorNombre(p.nombre),
+            tipo: p.tipo,
+            cantidad: p.cantidad
+          }))
+        };
+      } catch (e) {
+        this.editarError = e.message || 'Error cargando datos para editar';
+      } finally {
+        this.editarCargando = false;
+      }
+    },
+    getProductoPorId(id) {
+      return this.productos.find(p => p.id === id);
+    },
+    getProductoIdPorNombre(nombre) {
+      const prod = this.productos.find(p => p.nombre === nombre);
+      return prod ? prod.id : null;
+    },
+    onEditarProductoChange(idx) {
+      // Reset tipo a unidad si el producto no tiene paca
+      const prod = this.editarPedido.productos[idx];
+      const producto = this.getProductoPorId(prod.producto_id);
+      if (producto && (!producto.unidades_por_paca || producto.unidades_por_paca <= 0)) {
+        prod.tipo = 'unidad';
+      }
+    },
+    agregarEditarProducto() {
+      this.editarPedido.productos.push({ producto_id: this.productos[0].id, tipo: 'unidad', cantidad: 1 });
+    },
+    eliminarEditarProducto(idx) {
+      this.editarPedido.productos.splice(idx, 1);
+    },
+    async guardarEdicionPedido() {
+      this.guardandoEdicion = true;
+      this.editarError = '';
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL;
+        const url = new URL('/pedidos/actualizar', apiUrl);
+        const body = {
+          id: this.editarPedido.id,
+          estado: this.editarPedido.estado,
+          productos: this.editarPedido.productos.map(p => ({
+            producto_id: p.producto_id,
+            tipo: p.tipo,
+            cantidad: p.cantidad
+          }))
+        };
+        const res = await fetch(url, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        if (!res.ok) throw new Error('No se pudo actualizar el pedido');
+        this.editarPedidoId = null;
+        this.editarPedido = null;
+        this.cargarPedidos();
+      } catch (e) {
+        this.editarError = e.message || 'Error guardando cambios';
+      } finally {
+        this.guardandoEdicion = false;
       }
     }
   }
@@ -623,6 +764,16 @@ button:disabled {
 }
 .pedido-item.historial {
   margin-bottom: 2rem;
+}
+.editar-expandido {
+  background: #fffbe6;
+  border-radius: 8px;
+  margin-top: 1rem;
+  padding: 1rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.editar-formulario h5 {
+  margin-top: 0;
 }
 </style>
 
