@@ -57,23 +57,38 @@ class PedidoUpdate(BaseModel):
     productos: Optional[list[PedidoProductoUpdate]] = None
 
 @router.get("/")
-def listar_pedidos(estado: Optional[str] = None):
+def listar_pedidos(estado: Optional[str] = None, page: int = 1, limit: int = 10):
     try:
-        query = supabase.table("pedidos").select("*").order("fecha", desc=True).limit(10)
+        # Construir query base
+        query = supabase.table("pedidos").select("*").order("fecha", desc=True)
         if estado:
             if estado not in ["pendiente", "en proceso"]:
                 raise HTTPException(status_code=400, detail="Estado debe ser 'pendiente' o 'en proceso'")
             query = query.eq("estado", estado)
-        result = query.execute()
+        # Paginación
+        from_ = (page - 1) * limit
+        to_ = from_ + limit - 1
+        result = query.range(from_, to_).execute()
         pedidos = result.data
+        # Obtener información del cliente para cada pedido
         for pedido in pedidos:
             if pedido.get("cliente_id"):
                 cliente = supabase.table("clientes").select("nombre, telefono").eq("id", pedido["cliente_id"]).single().execute()
                 if cliente.data:
                     pedido["cliente"] = cliente.data
+        # Calcular total de pedidos y páginas
+        total_query = supabase.table("pedidos").select("id")
+        if estado:
+            total_query = total_query.eq("estado", estado)
+        total_result = total_query.execute()
+        total = len(total_result.data)
+        total_paginas = (total + limit - 1) // limit
         return {
             "pedidos": pedidos,
-            "total": len(pedidos)
+            "total": total,
+            "pagina": page,
+            "por_pagina": limit,
+            "total_paginas": total_paginas
         }
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

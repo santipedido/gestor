@@ -153,6 +153,12 @@
           </div>
 
         </div>
+        <!-- Paginación -->
+        <div class="paginacion">
+          <button @click="cambiarPagina(paginaActual - 1)" :disabled="paginaActual <= 1">Anterior</button>
+          <span>Página {{ paginaActual }} de {{ totalPaginas }}</span>
+          <button @click="cambiarPagina(paginaActual + 1)" :disabled="paginaActual >= totalPaginas">Siguiente</button>
+        </div>
       </div>
       <!-- Modal de confirmación de eliminación -->
       <div v-if="eliminarPedidoId !== null" class="modal-eliminar">
@@ -248,7 +254,9 @@ export default {
       editarError: '',
       guardandoEdicion: false,
       eliminarPedidoId: null,
-      eliminando: false
+      eliminando: false,
+      paginaActual: 1,
+      totalPaginas: 1
     }
   },
   computed: {
@@ -298,9 +306,12 @@ export default {
         if (this.filtroEstado) {
           url.searchParams.set('estado', this.filtroEstado);
         }
+        url.searchParams.set('page', this.paginaActual);
+        url.searchParams.set('limit', 10);
         const res = await fetch(url);
         const data = await res.json();
         this.pedidos = data.pedidos || [];
+        this.totalPaginas = data.total_paginas || 1;
       } catch (e) {
         this.error = 'Error cargando pedidos';
         this.pedidos = [];
@@ -587,6 +598,11 @@ export default {
       } finally {
         this.eliminando = false;
       }
+    },
+    cambiarPagina(nuevaPagina) {
+      if (nuevaPagina < 1 || nuevaPagina > this.totalPaginas) return;
+      this.paginaActual = nuevaPagina;
+      this.cargarPedidos();
     }
   }
 }
@@ -836,6 +852,25 @@ button:disabled {
 }
 .modal-contenido button {
   margin: 0 1rem;
+}
+.paginacion {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin: 2rem 0 0 0;
+}
+.paginacion button {
+  background: #2d8cf0;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1.2rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.paginacion button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
 }
 </style>
 
