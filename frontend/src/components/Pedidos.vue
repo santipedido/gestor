@@ -85,9 +85,32 @@
             <p><strong>Fecha:</strong> {{ formatearFecha(pedido.fecha) }}</p>
           </div>
           <div class="pedido-acciones">
-            <button class="btn-ver">Ver detalles</button>
+            <button class="btn-ver" @click="toggleDetallesPedido(pedido.id)">
+              {{ detallesPedidoId === pedido.id ? 'Ocultar detalles' : 'Ver detalles' }}
+            </button>
             <button class="btn-editar">Editar</button>
             <button class="btn-eliminar">Eliminar</button>
+          </div>
+
+          <!-- Sección expandible de detalles -->
+          <div v-if="detallesPedidoId === pedido.id" class="detalles-expandido">
+            <div v-if="detallesCargando" class="cargando">Cargando detalles...</div>
+            <div v-else-if="detallesError" class="mensaje-error">{{ detallesError }}</div>
+            <div v-else-if="detallesPedido" class="detalles-contenido">
+              <h5>Detalles del pedido</h5>
+              <p><strong>Estado:</strong> {{ detallesPedido.pedido.estado }}</p>
+              <p><strong>Cliente:</strong> {{ detallesPedido.cliente?.nombre || 'N/A' }} ({{ detallesPedido.cliente?.telefono || 'N/A' }})</p>
+              <p><strong>Fecha:</strong> {{ formatearFecha(detallesPedido.pedido.fecha) }}</p>
+              <h6>Productos:</h6>
+              <ul>
+                <li v-for="(prod, idx) in detallesPedido.productos" :key="idx">
+                  {{ prod.nombre }} ({{ prod.tipo === 'paca' ? `Paca de ${prod.unidades_por_paca} und` : 'Unidad' }}) x {{ prod.cantidad }} = ${{ prod.subtotal.toLocaleString() }}
+                </li>
+              </ul>
+              <div class="total-pedido">
+                <strong>Total: ${{ detallesPedido.total.toLocaleString() }}</strong>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -122,7 +145,11 @@ export default {
       // Nuevos datos para listar pedidos
       pedidos: [],
       filtroEstado: '',
-      cargando: false
+      cargando: false,
+      detallesPedidoId: null,
+      detallesPedido: null,
+      detallesCargando: false,
+      detallesError: ''
     }
   },
   computed: {
@@ -289,6 +316,31 @@ export default {
         this.error = e.message || 'Error enviando pedido';
       } finally {
         this.enviando = false;
+      }
+    },
+    async toggleDetallesPedido(id) {
+      if (this.detallesPedidoId === id) {
+        // Si ya está abierto, lo cerramos
+        this.detallesPedidoId = null;
+        this.detallesPedido = null;
+        this.detallesError = '';
+        return;
+      }
+      this.detallesPedidoId = id;
+      this.detallesPedido = null;
+      this.detallesCargando = true;
+      this.detallesError = '';
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL;
+        const url = new URL(`/pedidos/${id}`, apiUrl);
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('No se pudo obtener el detalle del pedido');
+        const data = await res.json();
+        this.detallesPedido = data;
+      } catch (e) {
+        this.detallesError = e.message || 'Error cargando detalles';
+      } finally {
+        this.detallesCargando = false;
       }
     }
   }
@@ -478,6 +530,21 @@ button:disabled {
 .mensaje-error {
   color: red;
   margin-top: 1rem;
+}
+
+.detalles-expandido {
+  background: #f4f8fb;
+  border-radius: 8px;
+  margin-top: 1rem;
+  padding: 1rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.detalles-contenido h5 {
+  margin-top: 0;
+}
+.detalles-contenido ul {
+  margin: 0 0 1rem 0;
+  padding-left: 1.2rem;
 }
 </style>
 
