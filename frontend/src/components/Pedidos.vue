@@ -132,7 +132,7 @@
                 <h6>Productos:</h6>
                 <div v-for="(prod, idx) in editarPedido.productos" :key="idx" class="form-group">
                   <label>Producto:</label>
-                  <input v-model="prod.busqueda" placeholder="Buscar producto por nombre" @input="filtrarEditarProductos(idx)" />
+                  <input v-model="prod.busqueda" placeholder="Buscar producto por nombre" @input="filtrarEditarProductos(idx)" :readonly="true" />
                   <div v-if="prod.productosFiltrados && prod.busqueda && prod.productosFiltrados.length > 0" class="resultados-busqueda">
                     <div v-for="p in prod.productosFiltrados" :key="p.id" @click="seleccionarEditarProducto(idx, p)" class="resultado-item">
                       {{ p.nombre }}
@@ -145,11 +145,7 @@
                   </select>
                   <label>Cantidad:</label>
                   <input type="number" v-model.number="prod.cantidad" min="1" />
-                  <button type="button" @click="eliminarEditarProducto(idx)">Eliminar</button>
-                </div>
-                <button type="button" @click="agregarEditarProducto">Agregar producto</button>
-                <div class="total-pedido">
-                  <strong>Total: ${{ totalEditarPedido.toLocaleString() }}</strong>
+                  <button type="button" @click="eliminarEditarProducto(idx)" disabled>Eliminar</button>
                 </div>
                 <button type="submit" :disabled="guardandoEdicion">Guardar cambios</button>
               </form>
@@ -513,31 +509,25 @@ export default {
       }
     },
     agregarEditarProducto() {
-      this.editarPedido.productos.push({ producto_id: this.productos[0].id, tipo: 'unidad', cantidad: 1, busqueda: this.productos[0].nombre, productosFiltrados: [] });
+      // No permitir agregar productos en edición
+      return;
     },
     eliminarEditarProducto(idx) {
-      this.editarPedido.productos.splice(idx, 1);
+      // No permitir eliminar productos en edición
+      return;
     },
     filtrarEditarProductos(idx) {
-      const busqueda = this.editarPedido.productos[idx].busqueda?.toLowerCase() || '';
-      if (busqueda.length < 2) {
-        this.$set(this.editarPedido.productos[idx], 'productosFiltrados', []);
-        return;
-      }
+      // Solo permitir buscar el producto original
+      const originalNombre = this.editarPedido.productos[idx].busqueda;
       this.$set(
         this.editarPedido.productos[idx],
         'productosFiltrados',
-        this.productos.filter(p => p.nombre.toLowerCase().includes(busqueda))
+        this.productos.filter(p => p.nombre === originalNombre)
       );
     },
     seleccionarEditarProducto(idx, producto) {
-      this.editarPedido.productos[idx].producto_id = producto.id;
-      this.editarPedido.productos[idx].busqueda = producto.nombre;
-      this.editarPedido.productos[idx].productosFiltrados = [];
-      // Reset tipo si el producto no tiene paca
-      if (!producto.unidades_por_paca || producto.unidades_por_paca <= 0) {
-        this.editarPedido.productos[idx].tipo = 'unidad';
-      }
+      // No permitir cambiar el producto
+      return;
     },
     async guardarEdicionPedido() {
       this.guardandoEdicion = true;
