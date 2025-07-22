@@ -132,11 +132,12 @@
                 <h6>Productos:</h6>
                 <div v-for="(prod, idx) in editarPedido.productos" :key="idx" class="form-group">
                   <label>Producto:</label>
-                  <select v-model.number="prod.producto_id" @change="onEditarProductoChange(idx)">
-                    <option v-for="p in productos" :key="p.id" :value="p.id">
+                  <input v-model="prod.busqueda" placeholder="Buscar producto por nombre" @input="filtrarEditarProductos(idx)" />
+                  <div v-if="prod.productosFiltrados && prod.busqueda && prod.productosFiltrados.length > 0" class="resultados-busqueda">
+                    <div v-for="p in prod.productosFiltrados" :key="p.id" @click="seleccionarEditarProducto(idx, p)" class="resultado-item">
                       {{ p.nombre }}
-                    </option>
-                  </select>
+                    </div>
+                  </div>
                   <label>Tipo:</label>
                   <select v-model="prod.tipo">
                     <option value="unidad">Unidad</option>
@@ -485,7 +486,9 @@ export default {
           productos: data.productos.map(p => ({
             producto_id: this.getProductoIdPorNombre(p.nombre),
             tipo: p.tipo,
-            cantidad: p.cantidad
+            cantidad: p.cantidad,
+            busqueda: p.nombre,
+            productosFiltrados: []
           }))
         };
       } catch (e) {
@@ -510,10 +513,31 @@ export default {
       }
     },
     agregarEditarProducto() {
-      this.editarPedido.productos.push({ producto_id: this.productos[0].id, tipo: 'unidad', cantidad: 1 });
+      this.editarPedido.productos.push({ producto_id: this.productos[0].id, tipo: 'unidad', cantidad: 1, busqueda: this.productos[0].nombre, productosFiltrados: [] });
     },
     eliminarEditarProducto(idx) {
       this.editarPedido.productos.splice(idx, 1);
+    },
+    filtrarEditarProductos(idx) {
+      const busqueda = this.editarPedido.productos[idx].busqueda?.toLowerCase() || '';
+      if (busqueda.length < 2) {
+        this.$set(this.editarPedido.productos[idx], 'productosFiltrados', []);
+        return;
+      }
+      this.$set(
+        this.editarPedido.productos[idx],
+        'productosFiltrados',
+        this.productos.filter(p => p.nombre.toLowerCase().includes(busqueda))
+      );
+    },
+    seleccionarEditarProducto(idx, producto) {
+      this.editarPedido.productos[idx].producto_id = producto.id;
+      this.editarPedido.productos[idx].busqueda = producto.nombre;
+      this.editarPedido.productos[idx].productosFiltrados = [];
+      // Reset tipo si el producto no tiene paca
+      if (!producto.unidades_por_paca || producto.unidades_por_paca <= 0) {
+        this.editarPedido.productos[idx].tipo = 'unidad';
+      }
     },
     async guardarEdicionPedido() {
       this.guardandoEdicion = true;
