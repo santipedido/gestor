@@ -692,6 +692,7 @@ export default {
       }
       this.editarPedido.productos.push({
         producto_id: producto.id,
+        nombre: producto.nombre,
         tipo: producto.unidades_por_paca > 0 ? 'unidad' : 'unidad',
         cantidad: 1
       });
