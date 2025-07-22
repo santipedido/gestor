@@ -116,6 +116,46 @@
       </div>
     </div>
 
+    <!-- Sección para historial de pedidos por teléfono -->
+    <div class="seccion-historial">
+      <h2>Historial de pedidos por teléfono</h2>
+      <form @submit.prevent="buscarHistorial">
+        <div class="form-group">
+          <label>Teléfono del cliente:</label>
+          <input v-model="telefonoHistorial" placeholder="Ej: 3001234567" required />
+          <button type="submit" :disabled="cargandoHistorial">Buscar</button>
+        </div>
+      </form>
+      <div v-if="cargandoHistorial" class="cargando">Buscando historial...</div>
+      <div v-else-if="historialError" class="mensaje-error">{{ historialError }}</div>
+      <div v-else-if="historialPedidos && historialPedidos.pedidos && historialPedidos.pedidos.length === 0" class="sin-pedidos">
+        No hay pedidos para este cliente.
+      </div>
+      <div v-else-if="historialPedidos && historialPedidos.pedidos && historialPedidos.pedidos.length > 0" class="historial-lista">
+        <div class="cliente-info">
+          <strong>Cliente:</strong> {{ historialPedidos.cliente.nombre }} ({{ historialPedidos.cliente.telefono }})
+        </div>
+        <div v-for="(item, idx) in historialPedidos.pedidos" :key="item.pedido.id" class="pedido-item historial">
+          <div class="pedido-header">
+            <h4>Pedido #{{ item.pedido.id }}</h4>
+            <span class="estado" :class="item.pedido.estado">{{ item.pedido.estado }}</span>
+          </div>
+          <div class="pedido-info">
+            <p><strong>Fecha:</strong> {{ formatearFecha(item.pedido.fecha) }}</p>
+          </div>
+          <h6>Productos:</h6>
+          <ul>
+            <li v-for="(prod, i) in item.productos" :key="i">
+              {{ prod.nombre }} ({{ prod.tipo === 'paca' ? `Paca de ${prod.unidades_por_paca} und` : 'Unidad' }}) x {{ prod.cantidad }} = ${{ prod.subtotal.toLocaleString() }}
+            </li>
+          </ul>
+          <div class="total-pedido">
+            <strong>Total: ${{ item.total.toLocaleString() }}</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div v-if="mensaje" class="mensaje-exito">{{ mensaje }}</div>
     <div v-if="error" class="mensaje-error">{{ error }}</div>
   </div>
@@ -149,7 +189,11 @@ export default {
       detallesPedidoId: null,
       detallesPedido: null,
       detallesCargando: false,
-      detallesError: ''
+      detallesError: '',
+      telefonoHistorial: '',
+      historialPedidos: null,
+      cargandoHistorial: false,
+      historialError: ''
     }
   },
   computed: {
@@ -341,6 +385,23 @@ export default {
         this.detallesError = e.message || 'Error cargando detalles';
       } finally {
         this.detallesCargando = false;
+      }
+    },
+    async buscarHistorial() {
+      this.cargandoHistorial = true;
+      this.historialError = '';
+      this.historialPedidos = null;
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL;
+        const url = new URL(`/pedidos/por-telefono/${this.telefonoHistorial}`, apiUrl);
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('No se encontró el cliente o no hay pedidos');
+        const data = await res.json();
+        this.historialPedidos = data;
+      } catch (e) {
+        this.historialError = e.message || 'Error buscando historial';
+      } finally {
+        this.cargandoHistorial = false;
       }
     }
   }
@@ -545,6 +606,23 @@ button:disabled {
 .detalles-contenido ul {
   margin: 0 0 1rem 0;
   padding-left: 1.2rem;
+}
+.seccion-historial {
+  margin-top: 3rem;
+  padding: 2rem;
+  background: #f7fafd;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.historial-lista {
+  margin-top: 1rem;
+}
+.cliente-info {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+.pedido-item.historial {
+  margin-bottom: 2rem;
 }
 </style>
 

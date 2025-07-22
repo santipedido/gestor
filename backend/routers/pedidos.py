@@ -67,6 +67,49 @@ def listar_pedidos(estado: Optional[str] = None):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+@router.get("/por-telefono/{telefono}")
+def historial_pedidos_por_telefono(telefono: str):
+    try:
+        # Buscar cliente por teléfono
+        cliente_result = supabase.table("clientes").select("id, nombre, telefono").eq("telefono", telefono).single().execute()
+        cliente = cliente_result.data
+        if not cliente:
+            raise HTTPException(status_code=404, detail="Cliente no encontrado")
+        # Buscar pedidos del cliente
+        pedidos_result = supabase.table("pedidos").select("*").eq("cliente_id", cliente["id"]).order("fecha", desc=True).limit(10).execute()
+        pedidos = pedidos_result.data or []
+        pedidos_detalle = []
+        for pedido in pedidos:
+            productos_result = supabase.table("pedido_productos").select("*").eq("pedido_id", pedido["id"]).execute()
+            productos = productos_result.data or []
+            productos_detalle = []
+            total = 0
+            for prod in productos:
+                producto_db = supabase.table("productos").select("nombre, unidades_por_paca").eq("id", prod["producto_id"]).single().execute().data
+                nombre = producto_db["nombre"] if producto_db else "N/A"
+                unidades_por_paca = producto_db["unidades_por_paca"] if producto_db else None
+                subtotal = prod["precio_unitario"] * prod["cantidad"]
+                total += subtotal
+                productos_detalle.append({
+                    "nombre": nombre,
+                    "tipo": prod["tipo"],
+                    "cantidad": prod["cantidad"],
+                    "precio_unitario": prod["precio_unitario"],
+                    "unidades_por_paca": unidades_por_paca,
+                    "subtotal": subtotal
+                })
+            pedidos_detalle.append({
+                "pedido": pedido,
+                "productos": productos_detalle,
+                "total": total
+            })
+        return {
+            "cliente": cliente,
+            "pedidos": pedidos_detalle
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 @router.get("/{id}")
 def obtener_pedido(id: int):
     try:
