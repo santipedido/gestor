@@ -315,7 +315,7 @@ def actualizar_pedido(pedido: PedidoUpdate = Body(...)):
             productos_a_insertar = []
             productos_despues_detalle = []
             for prod in pedido.productos:
-                producto_db = supabase.table("productos").select("nombre, unidades_por_paca").eq("id", prod.producto_id).single().execute().data
+                producto_db = supabase.table("productos").select("nombre, precio, unidades_por_paca").eq("id", prod.producto_id).single().execute().data
                 if not producto_db:
                     raise HTTPException(status_code=404, detail=f"Producto {prod.producto_id} no encontrado")
                 if prod.tipo == "paca":
