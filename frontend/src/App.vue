@@ -14,6 +14,7 @@
           <button :class="{ active: vista === 'productos' }" @click="cambiarVista('productos')">Productos</button>
           <button :class="{ active: vista === 'clientes' }" @click="cambiarVista('clientes')">Clientes</button>
           <button :class="{ active: vista === 'pedidos' }" @click="cambiarVista('pedidos')">Pedidos</button>
+          <button :class="{ active: vista === 'leerfactura' }" @click="cambiarVista('leerfactura')">Leer Factura</button>
         </nav>
       </div>
       <!-- Fondo oscuro al abrir menú en móvil -->
@@ -22,7 +23,8 @@
     <main class="main-content">
       <Productos v-if="vista === 'productos'" />
       <Clientes v-else-if="vista === 'clientes'" />
-      <Pedidos v-else />
+      <Pedidos v-else-if="vista === 'pedidos'" />
+      <LeerFactura v-else />
     </main>
   </div>
 </template>
@@ -31,13 +33,15 @@
 import Productos from './components/Productos.vue'
 import Clientes from './components/Clientes.vue'
 import Pedidos from './components/Pedidos.vue'
+import LeerFactura from './components/LeerFactura.vue'
 import './assets/global.css'
 
 export default {
   components: {
     Productos,
     Clientes,
-    Pedidos
+    Pedidos,
+    LeerFactura
   },
   data() {
     return {
