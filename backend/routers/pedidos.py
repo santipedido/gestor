@@ -46,48 +46,6 @@ def enviar_mensaje_whatsapp_greenapi(mensaje):
         print(f"Error enviando mensaje WhatsApp: {e}")
         return False
 
-def armar_mensaje_edicion_whatsapp(pedido_id, cliente, cambios, fecha):
-    mensaje = f"""✏️ *Pedido editado*
-
-#️⃣ *Pedido:* {pedido_id}
-👤 *Cliente:* {cliente.get('nombre', 'N/A')}
-📞 *Teléfono:* {cliente.get('telefono', 'N/A')}
-📅 *Fecha de edición:* {fecha}
-"""
-    if cambios.get('estado'):
-        mensaje += f"\n🔖 *Estado:* de {cambios['estado']['antes']} a {cambios['estado']['despues']}"
-    if cambios.get('productos_agregados'):
-        mensaje += "\n➕ *Productos agregados:*"
-        for p in cambios['productos_agregados']:
-            tipo = f"Paca de {p['unidades_por_paca']} und" if p['tipo'] == 'paca' else 'Unidad'
-            mensaje += f"\n- {p['nombre']} ({tipo}) x {p['cantidad']}"
-    if cambios.get('productos_eliminados'):
-        mensaje += "\n➖ *Productos eliminados:*"
-        for p in cambios['productos_eliminados']:
-            tipo = f"Paca de {p['unidades_por_paca']} und" if p['tipo'] == 'paca' else 'Unidad'
-            mensaje += f"\n- {p['nombre']} ({tipo}) x {p['cantidad']}"
-    if cambios.get('productos_modificados'):
-        mensaje += "\n🔄 *Productos modificados:*"
-        for p in cambios['productos_modificados']:
-            tipo_antes = f"Paca de {p['antes']['unidades_por_paca']} und" if p['antes']['tipo'] == 'paca' else 'Unidad'
-            tipo_despues = f"Paca de {p['despues']['unidades_por_paca']} und" if p['despues']['tipo'] == 'paca' else 'Unidad'
-            mensaje += f"\n- {p['antes']['nombre']}: cantidad {p['antes']['cantidad']}→{p['despues']['cantidad']}, tipo {tipo_antes}→{tipo_despues}"
-    return mensaje
-
-def comparar_productos_antes_despues(antes, despues):
-    # antes y despues: listas de dicts con producto_id, nombre, tipo, cantidad, unidades_por_paca
-    antes_dict = {p['producto_id']: p for p in antes}
-    despues_dict = {p['producto_id']: p for p in despues}
-    agregados = [p for pid, p in despues_dict.items() if pid not in antes_dict]
-    eliminados = [p for pid, p in antes_dict.items() if pid not in despues_dict]
-    modificados = []
-    for pid in antes_dict:
-        if pid in despues_dict:
-            a, d = antes_dict[pid], despues_dict[pid]
-            if a['cantidad'] != d['cantidad'] or a['tipo'] != d['tipo']:
-                modificados.append({'antes': a, 'despues': d})
-    return agregados, eliminados, modificados
-
 class PedidoProductoUpdate(BaseModel):
     producto_id: int
     tipo: str  # 'unidad' o 'paca'
